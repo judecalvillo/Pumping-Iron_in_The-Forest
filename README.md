@@ -10,43 +10,16 @@ As you can see, the source dataset is rather large. More importantly, it include
 ```r
 ## Load libraries: Caret, for machine learning, and dplyr for convenience. :)
 library(caret)
-```
-
-```
-## Loading required package: lattice
-## Loading required package: ggplot2
-## Use suppressPackageStartupMessages to eliminate package startup messages.
-```
-
-```r
 library(dplyr)
-```
 
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 ## Get the data, size up, and preview.
 the_data <- read.csv("data/pml-training.csv", na.strings = c("NA", ""))
+# print(head(the_data)) # Not going to preview in markdown (too large).
 print(dim(the_data))
 ```
 
 ```
 ## [1] 19622   160
-```
-
-```r
-# print(head(the_data)) # Not going to preview in markdown (too large).
 ```
 
 ##### Removing Useless Columns (variables)
@@ -61,15 +34,12 @@ na_colsum <- apply(the_data, 2, function(x){sum(is.na(x))})
 the_data <- the_data[, which(na_colsum == 0)]
 
 ## Size up and preview.
+# print(head(the_data)) # Not going to preview in markdown (too large).
 print(dim(the_data))
 ```
 
 ```
 ## [1] 19622    60
-```
-
-```r
-# print(head(the_data)) # Not going to preview here.
 ```
 
 ### Create the Training and 'Test' (Validation) Sets
@@ -85,6 +55,7 @@ training_set <- the_data[train_sample, ]
 validation_set <- the_data[-train_sample,]
 
 ## Size up and preview.
+# print(head(training_set)) # Not going to preview here.
 print(dim(training_set))
 ```
 
@@ -98,10 +69,6 @@ print(dim(validation_set))
 
 ```
 ## [1] 5885   60
-```
-
-```r
-# print(head(training_set)) # Not going to preview here.
 ```
 
 
