@@ -18,9 +18,7 @@ print(dim(the_data))
 ## Here, we get the sum of NAs per column (note, the margin argument of Apply
 ## function = 2, for columns only; default is 1, for rows/lists). Then, we replace
 ## the original df w/the a cleaner version of itself.
-na_colsum <- apply(the_data, 2, function(x) {
-    sum(is.na(x))
-})
+na_colsum <- apply(the_data, 2, function(x){sum(is.na(x))})
 the_data <- the_data[, which(na_colsum == 0)]
 
 ## Show size.
@@ -44,12 +42,12 @@ print(dim(validation_set))
 
 ########### Training the model (random forest) #############
 
-## Train using caret package (model = random forest or "rf"). 
-## Classe as outcome, predicted by any/all other variables.
-## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
-##             method uses, so yeah, I'm doing that. I need my computer for other things!
-the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
-                     trControl = trainControl(method = "cv", number = 2))
-
-## Let's see how this model fits...
-print(the_forest1$finalModel)
+# ## Train using caret package (model = random forest or "rf"). 
+# ## Classe as outcome, predicted by any/all other variables.
+# ## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
+# ##             method uses, so yeah, I'm doing that. I need my computer for other things!
+# the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
+#                      trControl = trainControl(method = "cv", number = 2))
+# 
+# ## Let's see how this model fits...
+# print(the_forest1$finalModel)
