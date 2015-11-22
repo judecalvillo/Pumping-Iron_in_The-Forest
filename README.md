@@ -1,3 +1,4 @@
+![](pumping_iron_forest.jpg)
 ## Pumping Iron in the Forest: A Machine Learning "Exercise." :)
 by Jude Calvillo  
 
@@ -8,9 +9,8 @@ As you can see, the source dataset is rather large. More importantly, it include
 
 
 ```r
-## Load libraries: Caret, for machine learning, and dplyr for convenience. :)
-library(caret)
-library(dplyr)
+## Load necessary libraries.
+library(caret) # For training/ML.
 
 ## Get the data, size up, and preview.
 the_data <- read.csv("data/pml-training.csv", na.strings = c("NA", ""))
