@@ -69,4 +69,30 @@ v_accuracy <- sum(v_predictions == validation_set$classe)/length(v_predictions)
 oos_error <- 1 - v_accuracy
 
 ## Print error rate, prettily. :)
-print(paste("Out of sample error rate: ", round(oos_error,3), "% (percent)", sep = ""))
+print(paste("Out of sample error rate: ", round(oos_error*100,3), "% (percent)", sep = ""))
+
+########### Use test data! ############
+
+## Get the data.
+test_data <- read.csv("data/pml-testing.csv", na.strings = c("NA", ""))
+
+
+########### Same pre-processing as before. ###########
+
+na_colsum2 <- apply(test_data, 2, function(x){sum(is.na(x))})
+test_data <- test_data[, which(na_colsum2 == 0)]
+
+## Show size.
+print(dim(test_data))
+
+## Test predictions
+t_predictions <- predict(the_forest1, test_data)
+
+########### Get test values ########
+pml_write_files = function(x){
+    n = length(x)
+    for(i in 1:n){
+        filename = paste0("problem_id_",i,".txt")
+        write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+    }
+}
