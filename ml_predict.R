@@ -1,6 +1,7 @@
 ## Load the necessary libraries.
 library(caret) # For training/machine learning.
 
+
 ## Get the data.
 the_data <- read.csv("data/pml-training.csv", na.strings = c("NA", ""))
 
@@ -23,6 +24,10 @@ the_data <- the_data[, which(na_colsum == 0)]
 ## Show size.
 print(dim(the_data))
 
+## Remove other -probably- useless variables.
+to_rm <- grep("timestamp|X|user_name|new_window", names(the_data))
+the_data <- the_data[, -to_rm]
+dim(the_data)
 
 ########### Partitioning (for later cross-validation) ############
 
@@ -44,16 +49,17 @@ print(dim(validation_set))
 ## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
 ##             method uses, so yeah, I'm doing that. I need my computer for other things!
 the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
-                     trControl = trainControl(method = "cv", number = 2))
+                     trControl = trainControl(method = "cv", number = 5))
 
 ## Let's 'see' the model.
-print(the_forest1$finalModel)
+print(the_forest1)
 
 ## Get the # of predictors for max accuracy.
 print(the_forest1$bestTune)
 
 ## Plot the accuracy per predictors.
-print(plot(the_forest1, col = "red", main = "Accuracy per Number of Random Predictors"))
+print(plot(the_forest1, col = "forestgreen", 
+main = "Model Accuracy per Number of Predictors Selected"))
 
 ############ Cross-Validate ############
 
@@ -76,23 +82,26 @@ print(paste("Out of sample error rate: ", round(oos_error*100,3), "% (percent)",
 ## Get the data.
 test_data <- read.csv("data/pml-testing.csv", na.strings = c("NA", ""))
 
-
 ########### Same pre-processing as before. ###########
 
 na_colsum2 <- apply(test_data, 2, function(x){sum(is.na(x))})
 test_data <- test_data[, which(na_colsum2 == 0)]
+to_rm2 <- grep("timestamp|X|user_name|new_window", names(test_data))
+test_data <- test_data[, -to_rm2]
 
 ## Show size.
 print(dim(test_data))
 
 ## Test predictions
 t_predictions <- predict(the_forest1, test_data)
+print(t_predictions)
 
-########### Get test values ########
-pml_write_files = function(x){
-    n = length(x)
+########### Export predicted values to text files for class submission ########
+## Supplied by professor.
+pml_write_files = function(t_predictions){
+    n = length(t_predictions)
     for(i in 1:n){
-        filename = paste0("problem_id_",i,".txt")
-        write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+        filename = paste0("data/problem_id_",i,".txt")
+        write.table(t_predictions[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
     }
 }

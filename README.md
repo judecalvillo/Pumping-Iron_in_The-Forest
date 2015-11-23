@@ -4,7 +4,7 @@ by Jude Calvillo
 
 Below, I will build, display, and cross-validate a "random forest" predictive model. This model aims to predict a physical exercise outcome, type of bicep curl (5 different types), from fitness tracker data (e.g. Fitbit) that initially includes 160 variables (yikes!).  
 
-* [Source (thank you!) >>](http://groupware.les.inf.puc-rio.br/har)
+[Source (thank you!) >>](http://groupware.les.inf.puc-rio.br/har)  
 
 ### Pre-Processing / Cleaning
 As you can see, the source dataset is rather large. More importantly, it includes a slew of variables that might predict the outcome of concern, the last variable: classe. Therefore, we should cut this down.
@@ -77,12 +77,20 @@ Now, we train the model via random forest method. In doing so, we'll limit its n
 
 
 ```r
-## Train using caret package (model = random forest or "rf"). Classe as outcome, predicted 
-## by any/all other variables.
-## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
-##             method uses, so yeah, I'm doing that. I need my computer for other things!
-the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
-                     trControl = trainControl(method = "cv", number = 2))
+## Train using caret package with random forest method ("rf"). Classe as outcome, predicted 
+## by any/all other variables. We're speed things up by limiting the number of folds the
+## method uses.
+
+## Also, in case I need to re-run this Rmd without touching the model, I'm using an if-else
+## statement to check for a previously stored model. If it exists, load it. If not, then we
+## train a new model and store it for later. :)
+if(file.exists("the_forest_model.Rdata")){
+    load("the_forest_model.Rdata")
+} else {
+    the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
+                     trControl = trainControl(method = "cv", number = 4))
+    save(the_forest1, file="the_forest1.Rdata")
+}
 ```
 
 ##### What does this model look like?
@@ -97,40 +105,41 @@ print(the_forest1)
 ## Random Forest 
 ## 
 ## 13737 samples
-##    59 predictor
+##    53 predictor
 ##     5 classes: 'A', 'B', 'C', 'D', 'E' 
 ## 
 ## No pre-processing
-## Resampling: Cross-Validated (2 fold) 
-## Summary of sample sizes: 6869, 6868 
+## Resampling: Cross-Validated (5 fold) 
+## Summary of sample sizes: 10989, 10990, 10989, 10990, 10990 
 ## Resampling results across tuning parameters:
 ## 
-##   mtry  Accuracy   Kappa      Accuracy SD   Kappa SD    
-##    2    0.9932300  0.9914363  0.0007199476  0.0009102389
-##   41    0.9999272  0.9999079  0.0001029567  0.0001302217
-##   81    0.9997816  0.9997238  0.0001029267  0.0001301838
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+##    2    0.9938122  0.9921722  0.002662612  0.003368837
+##   27    0.9967969  0.9959484  0.001218238  0.001540899
+##   53    0.9939577  0.9923570  0.002020851  0.002555799
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
-## The final value used for the model was mtry = 41.
+## The final value used for the model was mtry = 27.
 ```
 
 ```r
 ## Point of 'best tune' (i.e. highest accuracy)?
-print(paste("Best tune? (point of max accuracy):", the_forest1$bestTune, "randomly selected predictors"))
+print(paste("Best tune? (point of max accuracy):", the_forest1$bestTune, "predictors"))
 ```
 
 ```
-## [1] "Best tune? (point of max accuracy): 41 randomly selected predictors"
+## [1] "Best tune? (point of max accuracy): 27 predictors"
 ```
 
 ```r
 ## Plot the accuracy per predictors.
-print(plot(the_forest1, col = "red", main = "Accuracy per Number of Random Predictors"))
+print(plot(the_forest1, col = "forestgreen", 
+main = "Model Accuracy per Number of Predictors Selected"))
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
-And as you can see, the max accuracy is .9997, so the "in-sample error rate" is .0003 or .03%. Not bad, but with only 2 folds in our RF method, I expect the model to be a little biased. Let's see.  
+And as you can see, the max accuracy is .9997, so the "in-sample error rate" is .0003 or .03%. Not bad, but hopefully 5 folds will be enough to significantly limit bias. Let's see.  
 
 ### Cross-Validation / Out of Sample Error Rate
 Now, let's test this model against our validation dataset, defined above. Ultimately, before we go testing this model on the REAL test data, we'd like to see what kind of an *out of sample error rate* we should expect.
@@ -146,11 +155,11 @@ v_accuracy <- sum(v_predictions == validation_set$classe)/length(v_predictions)
 oos_error <- 1 - v_accuracy
 
 ## Print error rate, prettily. :)
-print(paste("Out of sample error rate: ",  round(oos_error*100,3), "% (percent)", sep = ""))
+print(paste("Out of sample error rate: ", round(oos_error*100,5), "% (percent)", sep = ""))
 ```
 
 ```
-## [1] "Out of sample error rate: 0.017% (percent)"
+## [1] "Out of sample error rate: 0.05098% (percent)"
 ```
 
 ##### *I therefore expect that the model will incur about the same out of sample error rate, when applied to the test data, as above.*
