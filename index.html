@@ -337,10 +337,10 @@ v_accuracy &lt;- sum(v_predictions == validation_set$classe)/length(v_prediction
 oos_error &lt;- 1 - v_accuracy
 
 ## Print error rate, prettily. :)
-print(paste(&quot;Out of sample error rate: &quot;, round(oos_error,3), &quot;% (percent)&quot;, sep = &quot;&quot;))
+print(paste(&quot;Out of sample error rate: &quot;, round(oos_error*100,3), &quot;% (percent)&quot;, sep = &quot;&quot;))
 </code></pre>
 
-<pre><code>## [1] &quot;Out of sample error rate: 0% (percent)&quot;
+<pre><code>## [1] &quot;Out of sample error rate: 0.017% (percent)&quot;
 </code></pre>
 
 <h5><em>I therefore expect that the model will incur about the same out of sample error rate, when applied to the test data, as above.</em></h5>
