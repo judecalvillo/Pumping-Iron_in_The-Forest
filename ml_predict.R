@@ -1,6 +1,5 @@
-## Load libraries: Caret, for machine learning, and dplyr for convenience. :)
-library(caret)
-library(dplyr)
+## Load the necessary libraries.
+library(caret) # For training/machine learning.
 
 ## Get the data.
 the_data <- read.csv("data/pml-training.csv", na.strings = c("NA", ""))
@@ -27,11 +26,9 @@ print(dim(the_data))
 
 ########### Partitioning (for later cross-validation) ############
 
-## Create the training set partition.
+## Create the training set partition and remaining validation set.
 train_sample <- createDataPartition(y = the_data$classe, p = 0.7, list = FALSE)
 training_set <- the_data[train_sample, ]
-
-## Create the validation data set.
 validation_set <- the_data[-train_sample,]
 
 ## Size up and preview.
@@ -42,12 +39,34 @@ print(dim(validation_set))
 
 ########### Training the model (random forest) #############
 
-# ## Train using caret package (model = random forest or "rf"). 
-# ## Classe as outcome, predicted by any/all other variables.
-# ## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
-# ##             method uses, so yeah, I'm doing that. I need my computer for other things!
-# the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
-#                      trControl = trainControl(method = "cv", number = 2))
-# 
-# ## Let's see how this model fits...
-# print(the_forest1$finalModel)
+## Train using caret package (model = random forest or "rf"). 
+## Classe as outcome, predicted by any/all other variables.
+## DISCLAIMER: I found out that you can speed things up by limiting the number of folds the
+##             method uses, so yeah, I'm doing that. I need my computer for other things!
+the_forest1 <- train(classe ~ ., method = "rf", data = training_set, 
+                     trControl = trainControl(method = "cv", number = 2))
+
+## Let's 'see' the model.
+print(the_forest1$finalModel)
+
+## Get the # of predictors for max accuracy.
+print(the_forest1$bestTune)
+
+## Plot the accuracy per predictors.
+print(plot(the_forest1, col = "red", main = "Accuracy per Number of Random Predictors"))
+
+############ Cross-Validate ############
+
+## We're cross-validating to see how well the model does with data that's outside
+## of the original sample.
+
+## Compute the predictions upon the validation set, using our forest model.
+v_predictions <- predict(the_forest1, validation_set)
+
+## Now, let's sum the # of correct predictions and divide by the total # of values to get 
+## accuracy and, consequently, the error rate.
+v_accuracy <- sum(v_predictions == validation_set$classe)/length(v_predictions)
+oos_error <- 1 - v_accuracy
+
+## Print error rate, prettily. :)
+print(paste("Out of sample error rate: ", round(oos_error,3), "% (percent)", sep = ""))
